@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Arma parc</title>
+    <link
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/css/dashboard.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
+    />
+  </head>
+  <body>
+    <div id="sidebar" class="bg-dark">
+      <div class="sidebar-header">
+        <h3>Username</h3>
+      </div>
+      <ul class="list-unstyled components">
+        <li>
+          <a href="/dashboard/home"
+            ><i class="fas fa-home"></i> Tableau de bord</a
+          >
+        </li>
+        <li>
+          <a href="/dashboard/parc"><i class="fas fa-truck"></i> Parc</a>
+        </li>
+        <li>
+          <a href="/dashboard/scans"
+            ><i class="fas fa-home"></i> Suivi des scans</a
+          >
+        </li>
+        <li>
+          <a href="/dashboard/pannes"><i class="fas fa-wrench"></i> Pannes</a>
+        </li>
+        <li>
+          <a href="/dashboard/agents"
+            ><i class="fas fa-users"></i> Liste des agents</a
+          >
+        </li>
+
+        <h3>Application</h3>
+        <li>
+          <a href="/dashboard/params"><i class="fas fa-cog"></i> Parametrage</a>
+        </li>
+        <li>
+          <a href="/dashboard/users"
+            ><i class="fas fa-users"></i> Utilisateurs</a
+          >
+        </li>
+      </ul>
+    </div>
+
+    <div id="content">
+      <nav class="navbar navbar-expand-lg navbar-custom">
+        <button type="button" id="sidebarCollapse" class="btn btn-info">
+          <i class="fas fa-bars"></i>
+        </button>
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-toggle="collapse"
+          data-target="#navbarNav"
+          aria-controls="navbarNav"
+          aria-expanded="false"
+          aria-label="Toggle navigation"
+        >
+          <span class="navbar-toggler-icon"><i class="fas fa-bars"></i></span>
+        </button>
+      </nav>
+      <div id="main-content">
+        <%- include(`partials/${content}.ejs`, params) %>
+      </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+      $(document).ready(function () {
+        $("#sidebarCollapse").on("click", function () {
+          $("#sidebar").toggleClass("active");
+        });
+      });
+    </script>
+  </body>
+</html>
