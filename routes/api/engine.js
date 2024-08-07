@@ -220,6 +220,7 @@ engineRoute.get("/:id/fiches-mobile", async (req, res) => {
   try {
     //todo add add fiche transfert
     const id = req.params.id;
+    //todo add privilege to search
     const privilege = parseInt(req.query.privilege);
     const frequence = req.query.frequence;
     console.log(frequence);
@@ -244,12 +245,14 @@ engineRoute.get("/:id/fiches-mobile", async (req, res) => {
     ]);
     const [checklistDb, categories] = await Promise.all([
       fetchCheckListByEngineType(engine.id_type_engin),
-      getFicheTransfertCategoriesOrdered(),
+      getFicheTransfertCategoriesOrdered(privilege),
     ]);
 
     const checklistDbIds = getEntries(
       checklistDb.entries_engin_fiche_transfert_checklist
     );
+    console.log(checklistDbIds);
+    console.log(categories);
     const checklist = [];
     for (const category of categories) {
       const checklists = await fetchChecklistByCategory(
@@ -257,9 +260,9 @@ engineRoute.get("/:id/fiches-mobile", async (req, res) => {
         frequence
       );
 
-      //   console.log(checklists);
+      console.log(checklists);
       category.entries = checklists.filter((ck) =>
-        checklistDbIds.includes(ck.id_fiche_category)
+        checklistDbIds.includes(ck.id_fiche_checklist)
       );
 
       if (category.entries.length > 0) {

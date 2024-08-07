@@ -21,10 +21,11 @@ const checklistRouter = express.Router();
 checklistRouter
   .route("")
   .get(async (req, res) => {
+    const privilege = req.query.privilege;
     try {
       const [entries, categories] = await Promise.all([
-        fetchChecklistEntries(),
-        getFicheTransfertCategoriesOrdered(),
+        fetchChecklistEntries(privilege),
+        getFicheTransfertCategoriesOrdered(privilege),
       ]);
 
       const ficheChecklist = categories.map((category) => {
@@ -86,6 +87,7 @@ checklistRouter
   .put(async (req, res) => {
     try {
       const category = req.body;
+      console.log(category);
       if (!category || !category.id || !category.libelle) {
         throw new Error("Request body not valid");
       }
@@ -149,7 +151,7 @@ checklistRouter.route("/:id").delete(async (req, res) => {
     if (!deleted) {
       throw new Error("Error deleting");
     }
-
+    console.log("success");
     return res.json({ success: "Categorie Supprimée avec succès" });
   } catch (error) {
     console.log(error);

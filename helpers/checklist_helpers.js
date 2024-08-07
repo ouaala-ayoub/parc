@@ -1,3 +1,4 @@
+import { OBJECT_NOT_FOUND } from "../constants.js";
 import connexion from "../dbConnection.mjs";
 import { getFrequecesList } from "../enums/frequence.js";
 import { RISK } from "../enums/risk.js";
@@ -12,8 +13,8 @@ export const insertCategory = async (category) => {
   }
   const categoryOrder = highestOrderCategory[0].order_fiche_category + 1;
   const [inserted] = await connexion.query(
-    "insert into param_fiche_transfert_checklist_category (libelle_fr_fiche_category, order_fiche_category) values (?, ?)",
-    [category.libelle, categoryOrder]
+    "insert into param_fiche_transfert_checklist_category (libelle_fr_fiche_category, privilege_fiche_category ,order_fiche_category) values (?, ?, ?)",
+    [category.libelle, category.privilege, categoryOrder]
   );
   return inserted;
 };
@@ -47,11 +48,11 @@ export const deleteAllCategoryEntries = async (categoryId) => {
 
 export const insertEntry = async (entry, order) => {
   const [inserted] = await connexion.query(
-    "insert into param_fiche_transfert_checklist (libelle_fr_fiche_checklist, risque_fiche_checklist, privileges_fiche_checklist ,frequences_fiche_checklist, order_fiche_checklist ,should_verify_fiche_checklist, id_fiche_category) values (?, ?, ?, ?, ?, ?, ?)",
+    "insert into param_fiche_transfert_checklist (libelle_fr_fiche_checklist, risque_fiche_checklist, privilege_fiche_checklist ,frequences_fiche_checklist, order_fiche_checklist ,should_verify_fiche_checklist, id_fiche_category) values (?, ?, ?, ?, ?, ?, ?)",
     [
       entry.libelle,
       entry.risk,
-      entry.privileges,
+      entry.privilege,
       entry.frequence,
       order,
       entry.shouldVerify,
@@ -72,14 +73,17 @@ export const fetchCheckListByEngineType = async (engineType) => {
   return results[0];
 };
 
-export const fetchChecklistEntries = async () => {
-  const [results] = await connexion.query(
-    `select * from param_fiche_transfert_checklist`
-  );
-
-  if (results.length == 0) {
-    throw new Error(OBJECT_NOT_FOUND);
+export const fetchChecklistEntries = async (privilege) => {
+  var query = `select * from param_fiche_transfert_checklist`;
+  if (privilege) {
+    query += ` where privilege_fiche_checklist=${privilege}`;
   }
+  const [results] = await connexion.query(query);
+
+  // if (results.length == 0) {
+  //   console.log("this is what happening");
+  //   throw new Error(OBJECT_NOT_FOUND);
+  // }
   return results;
 };
 
@@ -106,31 +110,33 @@ export const updateCategory = async (id, libelle) => {
 
 export const updateEntry = async (id, entry) => {
   const updated = await connexion.query(
-    `update param_fiche_transfert_checklist set libelle_fr_fiche_checklist=?, risque_fiche_checklist=?, privileges_fiche_checklist=? ,frequences_fiche_checklist=?, should_verify_fiche_checklist=? where id_fiche_checklist=?`,
-    [
-      entry.libelle,
-      entry.risk,
-      entry.privileges,
-      entry.frequence,
-      entry.shouldVerify,
-      id,
-    ]
+    `update param_fiche_transfert_checklist set libelle_fr_fiche_checklist=?, risque_fiche_checklist=? ,frequences_fiche_checklist=?, should_verify_fiche_checklist=? where id_fiche_checklist=?`,
+    [entry.libelle, entry.risk, entry.frequence, entry.shouldVerify, id]
   );
   return updated;
 };
 
-export const fetchChecklistByCategory = async (categoryId, frequency) => {
+export const fetchChecklistByCategory = async (
+  categoryId,
+  frequency,
+  privilege
+) => {
   try {
     var query =
       "SELECT * FROM param_fiche_transfert_checklist WHERE id_fiche_category = ?";
     if (frequency) {
       query += " AND frequences_fiche_checklist LIKE ?";
     }
+    if (privilege) {
+      query += " AND privilege_fiche_checklist = ?";
+    }
     query += " ORDER BY order_fiche_checklist";
     const [checklists] = await connexion.query(query, [
       categoryId,
       `%${frequency}%`,
+      privilege,
     ]);
+
     return checklists;
   } catch (error) {
     console.error("Error fetching checklists:", error);
@@ -146,10 +152,13 @@ export const deleteEntryById = async (id) => {
   return deleted;
 };
 
-export const getFicheTransfertCategoriesOrdered = async () => {
-  const [results] = await connexion.query(
-    `select * from param_fiche_transfert_checklist_category order by order_fiche_category`
-  );
+export const getFicheTransfertCategoriesOrdered = async (privilege) => {
+  var query = `select * from param_fiche_transfert_checklist_category`;
+  if (privilege) {
+    query += ` where privilege_fiche_category=${privilege}`;
+  }
+  query += ` order by order_fiche_category`;
+  const [results] = await connexion.query(query);
   return results;
 };
 
@@ -162,7 +171,7 @@ export const checkListToJson = (item) => {
     frequence: getFrequecesList(item.frequences_fiche_checklist),
     shouldVerify: item.should_verify_fiche_checklist,
     order: item.order_fiche_checklist,
-    privileges: getEntries(item.privileges_fiche_checklist) ?? [],
+    privilege: item.privilege_fiche_checklist,
   };
 };
 
@@ -172,6 +181,7 @@ export const categoryToJson = (category) => {
     libelle_fr: category.libelle_fr_fiche_category,
     libelle_ar: category.libelle_ar_fiche_category,
     order: category.order_fiche_category,
+    privilege: category.privilege_fiche_category,
     entries: category.entries.map((item) => {
       return checkListToJson(item);
     }),

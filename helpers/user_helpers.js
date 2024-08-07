@@ -78,7 +78,7 @@ export const agentToJson = (agent, login, sites) => {
     phone: agent?.telephone_agent ?? null,
     appVersion: agent.version_app_agent ?? null,
     login: login,
-    privileges: getEntries(agent.privileges_agent) ?? [],
+    privileges: getEntries(agent?.privileges_agent) ?? [],
   };
 
   if (sites) {

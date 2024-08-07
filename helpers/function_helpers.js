@@ -1,5 +1,5 @@
 export const getEntries = (toParse) => {
-  if (toParse.length === 0) return [];
+  if (toParse?.length === 0) return [];
   return toParse
     ?.slice(1, -1)
     ?.split(";")
